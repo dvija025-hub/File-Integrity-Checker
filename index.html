@@ -1,0 +1,175 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Integrity Checker</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f0f5;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .box {
+            background-color: white;
+            width: 500px;
+            margin: auto;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px gray;
+        }
+
+        h1 {
+            color: #1d3557;
+        }
+
+        p {
+            color: #555;
+        }
+
+        input {
+            margin: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background-color: #1d3557;
+        }
+
+        button:hover {
+            background-color: #457b9d;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            display: none;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+
+        <h1>File Integrity Checker</h1>
+
+        <p>
+            Check whether a file has been modified or not.
+        </p>
+
+        <input type="file" id="fileInput">
+
+        <br>
+
+        <button onclick="registerFile()">
+            Register File
+        </button>
+
+        <button onclick="verifyFile()">
+            Verify File
+        </button>
+
+        <div id="result"></div>
+
+    </div>
+
+
+    <script>
+
+        let originalHash = "";
+
+        // Generate SHA-256 hash
+        async function getHash(file) {
+
+            let data = await file.arrayBuffer();
+
+            let hash = await crypto.subtle.digest(
+                "SHA-256",
+                data
+            );
+
+            let hashArray = Array.from(
+                new Uint8Array(hash)
+            );
+
+            let hashString = hashArray
+                .map(byte => byte.toString(16).padStart(2, "0"))
+                .join("");
+
+            return hashString;
+        }
+
+
+        // Register the file
+        async function registerFile() {
+
+            let file = document.getElementById(
+                "fileInput"
+            ).files[0];
+
+            if (!file) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            originalHash = await getHash(file);
+
+            document.getElementById("result").style.display = "block";
+
+            document.getElementById("result").innerHTML =
+                "<b>File Registered Successfully!</b><br><br>" +
+                "Original Hash:<br>" +
+                originalHash;
+        }
+
+
+        // Verify the file
+        async function verifyFile() {
+
+            let file = document.getElementById(
+                "fileInput"
+            ).files[0];
+
+            if (!file) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            if (originalHash == "") {
+                alert("Please register the file first.");
+                return;
+            }
+
+            let currentHash = await getHash(file);
+
+            document.getElementById("result").style.display = "block";
+
+            if (originalHash == currentHash) {
+
+                document.getElementById("result").innerHTML =
+                    "<b>✓ File is Safe</b><br><br>" +
+                    "The file has not been modified.";
+
+            } else {
+
+                document.getElementById("result").innerHTML =
+                    "<b>⚠ File Modified</b><br><br>" +
+                    "The file has been changed.";
+            }
+        }
+
+    </script>
+
+</body>
+</html>
+```
